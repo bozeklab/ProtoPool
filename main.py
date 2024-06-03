@@ -45,10 +45,10 @@ def adjust_learning_rate(optimizer, rate):
 
 def learn_model(opt: Optional[List[str]]) -> None:
     parser = argparse.ArgumentParser(description='PrototypeGraph')
-    parser.add_argument('--data_type', default='birds', choices=['birds', 'cars'])
-    parser.add_argument('--data_train', help='Path to train data')
-    parser.add_argument('--data_push', help='Path to push data')
-    parser.add_argument('--data_test', help='Path to tets data')
+    parser.add_argument('--data_type', default='birds', choices=['birds', 'cars', 'mito'])
+    parser.add_argument('--data_train', help='Path to train data', default='data/mito_scale_resized_512_split/train')
+    parser.add_argument('--data_push', help='Path to push data', default='data/mito_scale_resized_512_split/train')
+    parser.add_argument('--data_test', help='Path to tets data', default='data/mito_scale_resized_512_split/test')
     parser.add_argument('--batch_size', type=int, default=80,
                         help='input batch size for training (default: 80)')
     parser.add_argument('--lr', type=float, default=0.001,
@@ -123,13 +123,13 @@ def learn_model(opt: Optional[List[str]]) -> None:
         kwargs.update({'num_workers': 9, 'pin_memory': True})
 
     transforms_train_test = transforms.Compose([
-        transforms.Resize((224, 224)),
+        #transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ])
 
     transforms_push = transforms.Compose([
-        transforms.Resize((224, 224)),
+        #transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ])
@@ -189,6 +189,32 @@ def learn_model(opt: Optional[List[str]]) -> None:
         test_loader = torch.utils.data.DataLoader(
             test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
             **kwargs)
+
+    elif args.data_type == 'mito':
+        train_dataset = datasets.ImageFolder(
+            args.data_train,
+            transforms_train_test,
+        )
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True,
+            **kwargs)
+
+        train_push_dataset = datasets.ImageFolder(
+            args.data_push,
+            transforms_push,
+        )
+        train_push_loader = torch.utils.data.DataLoader(
+            train_push_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
+            **kwargs)
+
+        test_dataset = datasets.ImageFolder(
+            args.data_test,
+            transforms_train_test,
+        )
+        test_loader = torch.utils.data.DataLoader(
+            test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
+            **kwargs)
+
     else:
         raise ValueError
 
@@ -344,9 +370,9 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     l1_mask = 1 - \
                         torch.t(model.prototype_class_identity).cuda()
                     l1 = (model.last_layer.weight * l1_mask).norm(p=1)
-
+                    print(f'{entropy_loss.item()=} {clst_loss_val.item()=} {clst_weight=} {sep_loss_val.item()=} {sep_weight=} {l1.item()=} {orthogonal_loss.item()=}')
                     loss = entropy_loss + clst_loss_val * clst_weight + \
-                        sep_loss_val * sep_weight + 1e-4 * l1 + orthogonal_loss 
+                        sep_loss_val * sep_weight + 1e-4 * l1 + orthogonal_loss
 
                     # ===================backward====================
                     optimizer.zero_grad()
@@ -418,6 +444,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     prob_leaves += prob.mean(dim=0).unsqueeze(
                         1).detach().cpu().numpy()
                     true = label
+                    print(f'{predicted=}')
+                    print(f'{true=}')
                     tst_acc += (predicted == true).sum()
                     total += label.size(0)
 
@@ -768,7 +796,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
             # that generates the representation
             # protoL_rf_info = model.proto_layer_rf_info
             layer_filter_sizes, layer_strides, layer_paddings = model.features.conv_info()
-            protoL_rf_info = compute_proto_layer_rf_info_v2(224, layer_filter_sizes, layer_strides, layer_paddings,
+            protoL_rf_info = compute_proto_layer_rf_info_v2(512, layer_filter_sizes, layer_strides, layer_paddings,
                                            prototype_kernel_size=1)
             rf_prototype_j = compute_rf_prototype(search_batch.size(2), batch_argmin_proto_dist_j, protoL_rf_info)
             

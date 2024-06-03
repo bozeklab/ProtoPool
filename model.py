@@ -197,6 +197,9 @@ class PrototypeChooser(nn.Module):
         '''
         # distances [b, p]
         # proto_presence [c, p, n]
+        if len(distances.shape) == 1:
+            distances = distances.reshape(1, distances.shape[-1])
+
         mixed_distances = torch.einsum('bp,cpn->bcn', distances, proto_presence)
 
         return mixed_distances  # [b, c, n]
