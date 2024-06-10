@@ -4,6 +4,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
@@ -46,7 +50,7 @@ def adjust_learning_rate(optimizer, rate):
 def learn_model(opt: Optional[List[str]]) -> None:
     parser = argparse.ArgumentParser(description='PrototypeGraph')
     parser.add_argument('--data_type', default='birds', choices=['birds', 'cars', 'mito'])
-    parser.add_argument('--data_train', help='Path to train data', default='data/mito_scale_resized_512_split/train')
+    parser.add_argument('--data_train', help='Path to train data', default='data/mito_scale_resized_512_split/train_aug')
     parser.add_argument('--data_push', help='Path to push data', default='data/mito_scale_resized_512_split/train')
     parser.add_argument('--data_test', help='Path to tets data', default='data/mito_scale_resized_512_split/test')
     parser.add_argument('--batch_size', type=int, default=80,
@@ -370,7 +374,6 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     l1_mask = 1 - \
                         torch.t(model.prototype_class_identity).cuda()
                     l1 = (model.last_layer.weight * l1_mask).norm(p=1)
-                    print(f'{entropy_loss.item()=} {clst_loss_val.item()=} {clst_weight=} {sep_loss_val.item()=} {sep_weight=} {l1.item()=} {orthogonal_loss.item()=}')
                     loss = entropy_loss + clst_loss_val * clst_weight + \
                         sep_loss_val * sep_weight + 1e-4 * l1 + orthogonal_loss
 
@@ -444,8 +447,6 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     prob_leaves += prob.mean(dim=0).unsqueeze(
                         1).detach().cpu().numpy()
                     true = label
-                    print(f'{predicted=}')
-                    print(f'{true=}')
                     tst_acc += (predicted == true).sum()
                     total += label.size(0)
 
@@ -508,6 +509,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
     tst_loss = np.zeros((args.num_classes, 1))
     tst_acc, total = 0, 0
     tst_tqdm = enumerate(test_loader, 0)
+    all_preds = []
+    all_labels = []
     with torch.no_grad():
         for i, (data, label) in tst_tqdm:
             data = data.to(device)
@@ -529,13 +532,37 @@ def learn_model(opt: Optional[List[str]]) -> None:
             true = label
             tst_acc += (predicted == true).sum()
             total += label.size(0)
+            all_preds.extend(predicted.cpu().numpy())
+            all_labels.extend(true.cpu().numpy())
 
         tst_loss /= len(test_loader)
         tst_acc = tst_acc.item() / total
     print(
         f'Before tuning, test loss: {tst_loss.mean():.5f} | acc: {tst_acc:.5f}')
 
+    ####################################
+    #         log confusion matrix     #
+    ####################################
+    cm = confusion_matrix(all_labels, all_preds)
+    fig, ax = plt.subplots()
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
+    ax.set_xlabel('Predicted')
+    ax.set_ylabel('True')
+    ax.set_title('Confusion Matrix')
+
+    # Convert matplotlib figure to tensorboard image
+    fig.canvas.draw()
+    img = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+    img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    img = np.transpose(img, (2, 0, 1))
+
+    writer.add_image('Confusion Matrix', img)
+    plt.close(fig)
+
+
+
     global_min_proto_dist = np.full(model_multi.module.num_prototypes, np.inf)
+    global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
     global_min_fmap_patches = np.zeros(
         [model_multi.module.num_prototypes,
          model_multi.module.prototype_shape[1],
@@ -561,6 +588,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
                                    start_index_of_search_batch=start_index_of_search_batch,
                                    model=model_multi.module,
                                    global_min_proto_dist=global_min_proto_dist,
+                                   global_proto_trace=global_proto_trace,
                                    global_min_fmap_patches=global_min_fmap_patches,
                                    proto_rf_boxes=proto_rf_boxes,
                                    proto_bound_boxes=proto_bound_boxes,
@@ -572,6 +600,10 @@ def learn_model(opt: Optional[List[str]]) -> None:
                                    prototype_self_act_filename_prefix='prototype-self-act',
                                    prototype_activation_function_in_numpy=None)
 
+    with open(proto_img_dir + '/proto_trace.txt', "a") as f:
+        for i, l in enumerate(global_proto_trace):
+            print(str(i) + ' ' + str(l), file=f)
+
     prototype_update = np.reshape(global_min_fmap_patches,
                                   tuple(model_multi.module.prototype_shape))
     model_multi.module.prototype_vectors.data.copy_(torch.tensor(prototype_update, dtype=torch.float32).cuda())
@@ -581,7 +613,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
     print('Fine-tuning')
     max_val_tst = 0
     min_val_loss = 10e5
-    for tune_epoch in range(25):
+    fine_epochs = 15
+    for tune_epoch in range(fine_epochs):
         trn_loss = 0
         trn_tqdm = enumerate(train_loader, 0)
         model_multi.train()
@@ -662,7 +695,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
         if trn_loss is None:
             trn_loss = loss.mean().detach()
             trn_loss = trn_loss.cpu().numpy() / len(train_loader)
-        print(f'Epoch {tune_epoch}|{5}, train loss: {trn_loss:.5f}, test loss: {tst_loss.mean():.5f} '
+        print(f'Epoch {tune_epoch}|{fine_epochs}, train loss: {trn_loss:.5f}, test loss: {tst_loss.mean():.5f} '
               f'| acc: {tst_acc:.5f}, (minimal test-loss: {min_val_loss:.5f}- ')
 
         ####################################
@@ -703,6 +736,7 @@ def dist_loss(model, min_distances, proto_presence, top_k, sep=False):
 def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                                model,
                                global_min_proto_dist,  # this will be updated
+                               global_proto_trace,
                                global_min_fmap_patches,  # this will be updated
                                proto_rf_boxes,  # this will be updated
                                proto_bound_boxes,  # this will be updated
@@ -864,6 +898,8 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                     heatmap = np.float32(heatmap) / 255
                     heatmap = heatmap[...,::-1]
                     overlayed_original_img_j = 0.5 * original_img_j + 0.3 * heatmap
+
+                    global_proto_trace[j] = {'cls': str(search_y[rf_prototype_j[0]].item()), 'index': rf_prototype_j[0] + start_index_of_search_batch}
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
                                             prototype_img_filename_prefix + '-original_with_self_act' + str(j) + '.png'),
                                overlayed_original_img_j,

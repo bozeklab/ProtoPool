@@ -10,7 +10,7 @@ model_urls = {
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
-    'resnet50Nat': '~/resnet50_iNaturalist.pth',
+    'resnet50Nat': 'resnet50_iNaturalist.pth',
 }
 
 model_dir = './pretrained_models'
