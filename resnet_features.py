@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 
 model_urls = {
-    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
+    'resnet18': './pretrained_models/tenpercent_resnet18.ckpt',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
@@ -131,15 +131,16 @@ class ResNet_features(nn.Module):
         super(ResNet_features, self).__init__()
 
         self.inplanes = 64
+        kernel_test = 7
 
         # the first convolutional layer before the structured sequence of blocks
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=kernel_test, stride=2, padding=3,
                                bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         # comes from the first conv and the following max pool
-        self.kernel_sizes = [7, 3]
+        self.kernel_sizes = [kernel_test, 3]
         self.strides = [2, 2]
         self.paddings = [3, 1]
 
@@ -234,10 +235,16 @@ def resnet18_features(pretrained=False, **kwargs):
     """
     model = ResNet_features(BasicBlock, [2, 2, 2, 2], **kwargs)
     if pretrained:
-        my_dict = model_zoo.load_url(model_urls['resnet18'], model_dir=model_dir)
-        my_dict.pop('fc.weight')
-        my_dict.pop('fc.bias')
-        model.load_state_dict(my_dict, strict=False)
+        saved_model_dict = torch.load(model_urls['resnet18'])['state_dict']
+        model_dict = {}
+        begining = 'model.resnet.'
+        len_beg = len(begining)
+        for k in saved_model_dict.keys():
+            if k.startswith(begining):
+                key = k[len_beg:]
+                if key not in ["fc.1.weight", "fc.1.bias", "fc.3.weight", "fc.3.bias"]:
+                    model_dict[key] = saved_model_dict[k]
+        model.load_state_dict(model_dict)
     return model
 
 

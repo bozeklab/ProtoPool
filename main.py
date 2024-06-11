@@ -13,6 +13,7 @@ import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms, datasets
+import torch.nn as nn
 
 from model import PrototypeChooser
 from utils import mixup_data, find_high_activation_crop
@@ -239,6 +240,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
         model.load_state_dict(torch.load(args.ppnet_path, map_location='cpu')[
                               'model_state_dict'], strict=True)
         print('Successfully loaded ' + args.ppnet_path)
+
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=128, stride=2, padding=3, bias=False)
 
     model.to(device)
     if args.warmup:

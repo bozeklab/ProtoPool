@@ -70,6 +70,7 @@ class PrototypeChooser(nn.Module):
         else:
             self.features = base_architecture_to_features[self.arch](pretrained=pretrained)
 
+
         features_name = str(self.features).upper()
         if features_name.startswith('VGG') or features_name.startswith('RES'):
             first_add_on_layer_in_channels = \
