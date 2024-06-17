@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 
 model_urls = {
-    'resnet18': './pretrained_models/tenpercent_resnet18.ckpt',
+    'resnet18': '/data_ssd/tmp/tenpercent_resnet18.ckpt',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
