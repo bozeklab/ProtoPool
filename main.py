@@ -829,6 +829,9 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
             filename_j = search_batch_input['filename'][batch_argmin_proto_dist_j]
 
+            print('!!!!')
+            print(filename_j)
+
             if class_specific:
                 '''
                 change the argmin index from the index among
