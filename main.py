@@ -39,7 +39,7 @@ class ImageFolderWithFilenames(datasets.ImageFolder):
         path, _ = self.imgs[index]
         filename = os.path.splitext(os.path.basename(path))[0]
         # Return the image, label, and filename
-        return {'image': image, 'filename': filename}
+        return {'image': (image, label), 'filename': filename}
 
 
 def save_model(model, path, epoch):
