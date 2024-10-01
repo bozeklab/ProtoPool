@@ -926,6 +926,8 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                 if prototype_self_act_filename_prefix is not None:
                     pattern = f'_p{j}*'
                     files_to_remove = glob.glob(os.path.join(dir_for_saving_prototypes, pattern))
+                    print('!!!')
+                    print(files_to_remove)
                     for file in files_to_remove:
                         print('removing ', file)
                         os.remove(file)
