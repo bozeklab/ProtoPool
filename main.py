@@ -588,7 +588,9 @@ def learn_model(opt: Optional[List[str]]) -> None:
     writer.add_image('Confusion Matrix', img)
     plt.close(fig)
 
-    for K in reverse(list(range(1, 6))):
+    kn = list(range(1, 6))
+    kn.reverse()
+    for K in kn:
 
         global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
         for i in range(model_multi.module.num_prototypes):
@@ -616,6 +618,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
             start_index_of_search_batch = push_iter * search_batch_size
 
+            proto_img_dir_K = os.makedirs(os.path.join(proto_img_dir, K), exist_ok=True)
+
             update_prototypes_on_batch(search_batch_input=search_batch_input,
                                        start_index_of_search_batch=start_index_of_search_batch,
                                        model=model_multi.module,
@@ -628,7 +632,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
                                        class_specific=True,
                                        search_y=search_batch_input['image'][1],
                                        prototype_layer_stride=1,
-                                       dir_for_saving_prototypes=proto_img_dir,
+                                       dir_for_saving_prototypes=proto_img_dir_K,
                                        prototype_img_filename_prefix='prototype-img',
                                        prototype_self_act_filename_prefix='prototype-self-act',
                                        prototype_activation_function_in_numpy=None)
