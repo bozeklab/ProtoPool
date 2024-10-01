@@ -777,8 +777,6 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                                prototype_activation_function_in_numpy=None
                                ):
     model.eval()
-    print('!!!')
-    print(search_batch_input)
     search_batch = search_batch_input['image'][0]
 
     with torch.no_grad():
@@ -917,12 +915,12 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
                     # save the numpy array of the prototype self activation
                     np.save(os.path.join(dir_for_saving_prototypes,
-                                         prototype_self_act_filename_prefix + filename_j + str(j) + '.npy'),
+                                         prototype_self_act_filename_prefix + filename_j + '_p' + str(j) + '.npy'),
                             proto_act_img_j)
                 if prototype_img_filename_prefix is not None:
                     # save the whole image containing the prototype as png
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + '-original' + filename_j + str(j) + '.png'),
+                                            prototype_img_filename_prefix + '-original' + filename_j + '_p' + str(j) + '.png'),
                                original_img_j,
                                vmin=0.0,
                                vmax=1.0)
@@ -961,7 +959,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                     
                     # save the prototype image (highly activated region of the whole image)
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + filename_j + 'p_' + str(j) + '.png'),
+                                            prototype_img_filename_prefix + filename_j + '_p' + str(j) + '.png'),
                                proto_img_j,
                                vmin=0.0,
                                vmax=1.0)
