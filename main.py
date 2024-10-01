@@ -3,6 +3,7 @@ import os
 import glob
 from datetime import datetime
 from pathlib import Path
+import heapq
 from typing import List, Optional
 
 import matplotlib.pyplot as plt
@@ -587,9 +588,10 @@ def learn_model(opt: Optional[List[str]]) -> None:
     writer.add_image('Confusion Matrix', img)
     plt.close(fig)
 
+    global_min_proto_dist = np.full(model_multi.module.num_prototypes, None)
+    for i in range(num_prototypes):
+        global_min_proto_dist[i] = []
 
-
-    global_min_proto_dist = np.full(model_multi.module.num_prototypes, np.inf)
     global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
     global_min_fmap_patches = np.zeros(
         [model_multi.module.num_prototypes,
@@ -620,6 +622,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
                                    global_min_fmap_patches=global_min_fmap_patches,
                                    proto_rf_boxes=proto_rf_boxes,
                                    proto_bound_boxes=proto_bound_boxes,
+                                   K=1,
                                    class_specific=True,
                                    search_y=search_batch_input['image'][1],
                                    prototype_layer_stride=1,
@@ -768,6 +771,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                                global_min_fmap_patches,  # this will be updated
                                proto_rf_boxes,  # this will be updated
                                proto_bound_boxes,  # this will be updated
+                               K=1,
                                class_specific=True,
                                search_y=None,  # required if class_specific == True
                                num_classes=None,  # required if class_specific == True
@@ -824,7 +828,17 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
         batch_min_proto_dist_j = np.amin(proto_dist_j)
 
-        if batch_min_proto_dist_j < global_min_proto_dist[j]:
+        found = False
+
+        if len(global_min_proto_dist[j]) < K:
+            heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
+            #found = True
+        elif batch_min_proto_dist_j < -global_min_proto_dist[j][0]:  # Compare with the largest of the k smallest
+            heapq.heappop(global_min_proto_dist[j])
+            heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
+            found = True
+
+        if found:
             batch_argmin_proto_dist_j = \
                 list(np.unravel_index(np.argmin(proto_dist_j, axis=None),
                                       proto_dist_j.shape))
