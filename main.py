@@ -602,7 +602,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     search_batch_size = train_push_loader.batch_size     
 
-    for push_iter, (search_batch_input, search_y) in enumerate(train_push_loader):
+    for push_iter, search_batch_input in enumerate(train_push_loader):
         '''
         start_index_of_search keeps track of the index of the image
         assigned to serve as prototype
@@ -619,7 +619,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
                                    proto_rf_boxes=proto_rf_boxes,
                                    proto_bound_boxes=proto_bound_boxes,
                                    class_specific=True,
-                                   search_y=search_y,
+                                   search_y=search_batch_input['image'][1],
                                    prototype_layer_stride=1,
                                    dir_for_saving_prototypes=proto_img_dir,
                                    prototype_img_filename_prefix='prototype-img',
@@ -779,7 +779,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
     model.eval()
     print('!!!')
     print(search_batch_input)
-    search_batch = search_batch_input['image']
+    search_batch = search_batch_input['image'][0]
 
     with torch.no_grad():
         search_batch = search_batch.cuda()
