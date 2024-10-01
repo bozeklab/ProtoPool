@@ -830,9 +830,6 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
         found = False
 
-        print('!!!!')
-        print(global_min_proto_dist[j])
-
         if len(global_min_proto_dist[j]) < K:
             heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
             #found = True
@@ -869,7 +866,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                                                    fmap_height_start_index:fmap_height_end_index,
                                                    fmap_width_start_index:fmap_width_end_index]
 
-            global_min_proto_dist[j] = batch_min_proto_dist_j
+            #global_min_proto_dist[j] = batch_min_proto_dist_j
             global_min_fmap_patches[j] = batch_min_fmap_patch_j
 
            # get the receptive field boundary of the image patch
