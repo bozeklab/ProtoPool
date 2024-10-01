@@ -591,6 +591,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
     global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
     for i in range(model_multi.module.num_prototypes):
         global_min_proto_dist[i] = []
+    print('!!!!')
+    print(global_min_proto_dist)
 
     global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
     global_min_fmap_patches = np.zeros(
