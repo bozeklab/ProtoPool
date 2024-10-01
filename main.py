@@ -827,14 +827,6 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                 list(np.unravel_index(np.argmin(proto_dist_j, axis=None),
                                       proto_dist_j.shape))
 
-            print('!!!!!')
-            print(batch_argmin_proto_dist_j)
-
-            filename_j = search_batch_input['filename'][batch_argmin_proto_dist_j]
-
-            print('!!!!')
-            print(filename_j)
-
             if class_specific:
                 '''
                 change the argmin index from the index among
@@ -868,7 +860,8 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
             protoL_rf_info = compute_proto_layer_rf_info_v2(512, layer_filter_sizes, layer_strides, layer_paddings,
                                            prototype_kernel_size=1)
             rf_prototype_j = compute_rf_prototype(search_batch.size(2), batch_argmin_proto_dist_j, protoL_rf_info)
-            
+
+            filename_j = search_batch_input['filename'][rf_prototype_j[0]]
             # get the whole image
             original_img_j = search_batch_input[rf_prototype_j[0]]
             original_img_j = original_img_j.numpy()
