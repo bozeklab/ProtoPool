@@ -68,9 +68,12 @@ def adjust_learning_rate(optimizer, rate):
 def learn_model(opt: Optional[List[str]]) -> None:
     parser = argparse.ArgumentParser(description='PrototypeGraph')
     parser.add_argument('--data_type', default='birds', choices=['birds', 'cars', 'mito'])
-    parser.add_argument('--data_train', help='Path to train data', default='/data_ssd/tmp/mito_scale_resized_512_split/train_aug')
-    parser.add_argument('--data_push', help='Path to push data', default='/data_ssd/tmp/mito_scale_resized_512_split/train')
-    parser.add_argument('--data_test', help='Path to tets data', default='/data_ssd/tmp/mito_scale_resized_512_split/test')
+    parser.add_argument('--data_train', help='Path to train data',
+                        default='/data/pwojcik/mito_work/dataset_512_protopool/train_cropped_augmented')
+    parser.add_argument('--data_push', help='Path to push data',
+                        default='/data/pwojcik/mito_work/dataset_512_protopool/train')
+    parser.add_argument('--data_test', help='Path to tets data',
+                             default='/data/pwojcik/mito_work/dataset_512_protopool/test')
     parser.add_argument('--batch_size', type=int, default=80,
                         help='input batch size for training (default: 80)')
     parser.add_argument('--lr', type=float, default=0.001,
