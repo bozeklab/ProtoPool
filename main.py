@@ -589,7 +589,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     plt.close(fig)
 
     global_min_proto_dist = np.full(model_multi.module.num_prototypes, None)
-    for i in range(num_prototypes):
+    for i in range(model_multi.module.num_prototypes):
         global_min_proto_dist[i] = []
 
     global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
