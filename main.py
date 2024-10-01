@@ -927,7 +927,9 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                     pattern = f'_p{j}*'
                     files_to_remove = glob.glob(os.path.join(dir_for_saving_prototypes, pattern))
                     for file in files_to_remove:
+                        print('removing ', file)
                         os.remove(file)
+
 
                     # save the numpy array of the prototype self activation
                     np.save(os.path.join(dir_for_saving_prototypes,
