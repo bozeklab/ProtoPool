@@ -863,7 +863,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
             filename_j = search_batch_input['filename'][rf_prototype_j[0]]
             # get the whole image
-            original_img_j = search_batch_input[rf_prototype_j[0]]
+            original_img_j = search_batch_input['image'][rf_prototype_j[0]]
             original_img_j = original_img_j.numpy()
             original_img_j = np.transpose(original_img_j, (1, 2, 0))
             original_img_size = original_img_j.shape[0]
