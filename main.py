@@ -1,5 +1,6 @@
 import argparse
 import os
+import glob
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
@@ -224,10 +225,12 @@ def learn_model(opt: Optional[List[str]]) -> None:
             train_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True,
             **kwargs)
 
-        train_push_dataset = datasets.ImageFolder(
+        train_push_dataset = ImageFolderWithFilenames(
             args.data_push,
+#            '/shared/sets/datasets/birds/train_birds/train_birds/train_birds/',
             transforms_push,
         )
+
         train_push_loader = torch.utils.data.DataLoader(
             train_push_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False,
             **kwargs)
@@ -905,6 +908,11 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
             if dir_for_saving_prototypes is not None:
                 if prototype_self_act_filename_prefix is not None:
+                    pattern = f'p_{j}*'
+                    files_to_remove = glob.glob(os.path.join(folder, pattern))
+                    for file in files_to_remove:
+                        os.remove(file)
+
                     # save the numpy array of the prototype self activation
                     np.save(os.path.join(dir_for_saving_prototypes,
                                          prototype_self_act_filename_prefix + filename_j + str(j) + '.npy'),
@@ -926,7 +934,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
                     global_proto_trace[j] = {'cls': str(search_y[rf_prototype_j[0]].item()), 'index': rf_prototype_j[0] + start_index_of_search_batch}
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + filename_j + '-original_with_self_act' + str(j) + '.png'),
+                                            prototype_img_filename_prefix + filename_j + '-original_with_self_act_p' + str(j) + '.png'),
                                overlayed_original_img_j,
                                vmin=0.0,
                                vmax=1.0)
@@ -934,24 +942,24 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                     # if different from the original (whole) image, save the prototype receptive field as png
                     if rf_img_j.shape[0] != original_img_size or rf_img_j.shape[1] != original_img_size:
                         plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                                prototype_img_filename_prefix + filename_j + '-receptive_field' + str(j) + '.png'),
+                                                prototype_img_filename_prefix + filename_j + '-receptive_field_p' + str(j) + '.png'),
                                    rf_img_j,
                                    vmin=0.0,
                                    vmax=1.0)
                         output_file = os.path.join(dir_for_saving_prototypes,
-                                                   prototype_img_filename_prefix + filename_j + '-receptive_field' + str(j) + '.npy')
+                                                   prototype_img_filename_prefix + filename_j + '-receptive_field_p' + str(j) + '.npy')
                         np.save(output_file, proto_bound_boxes)
                         overlayed_rf_img_j = overlayed_original_img_j[rf_prototype_j[1]:rf_prototype_j[2],
                                                                       rf_prototype_j[3]:rf_prototype_j[4]]
                         plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                                prototype_img_filename_prefix + filename_j + '-receptive_field_with_self_act' + str(j) + '.png'),
+                                                prototype_img_filename_prefix + filename_j + '-receptive_field_with_self_act_p' + str(j) + '.png'),
                                    overlayed_rf_img_j,
                                    vmin=0.0,
                                    vmax=1.0)
                     
                     # save the prototype image (highly activated region of the whole image)
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + filename_j + str(j) + '.png'),
+                                            prototype_img_filename_prefix + filename_j + 'p_' + str(j) + '.png'),
                                proto_img_j,
                                vmin=0.0,
                                vmax=1.0)
