@@ -827,6 +827,9 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                 list(np.unravel_index(np.argmin(proto_dist_j, axis=None),
                                       proto_dist_j.shape))
 
+            print('!!!!!')
+            print(batch_argmin_proto_dist_j)
+
             filename_j = search_batch_input['filename'][batch_argmin_proto_dist_j]
 
             print('!!!!')
