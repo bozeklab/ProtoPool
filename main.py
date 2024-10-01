@@ -591,8 +591,6 @@ def learn_model(opt: Optional[List[str]]) -> None:
     global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
     for i in range(model_multi.module.num_prototypes):
         global_min_proto_dist[i] = []
-    print('!!!!')
-    print(global_min_proto_dist)
 
     global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
     global_min_fmap_patches = np.zeros(
@@ -831,6 +829,9 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
         batch_min_proto_dist_j = np.amin(proto_dist_j)
 
         found = False
+
+        print('!!!!')
+        print(global_min_proto_dist[j])
 
         if len(global_min_proto_dist[j]) < K:
             heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
