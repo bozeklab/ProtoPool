@@ -588,7 +588,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     writer.add_image('Confusion Matrix', img)
     plt.close(fig)
 
-    global_min_proto_dist = np.full(model_multi.module.num_prototypes, None)
+    global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
     for i in range(model_multi.module.num_prototypes):
         global_min_proto_dist[i] = []
 
