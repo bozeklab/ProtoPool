@@ -588,48 +588,50 @@ def learn_model(opt: Optional[List[str]]) -> None:
     writer.add_image('Confusion Matrix', img)
     plt.close(fig)
 
-    global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
-    for i in range(model_multi.module.num_prototypes):
-        global_min_proto_dist[i] = []
+    for K in reverse(list(range(1, 6))):
 
-    global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
-    global_min_fmap_patches = np.zeros(
-        [model_multi.module.num_prototypes,
-         model_multi.module.prototype_shape[1],
-         model_multi.module.prototype_shape[2],
-         model_multi.module.prototype_shape[3]])
+        global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
+        for i in range(model_multi.module.num_prototypes):
+            global_min_proto_dist[i] = []
 
-    proto_rf_boxes = np.full(shape=[model.num_prototypes, 6],
-                                fill_value=-1)
-    proto_bound_boxes = np.full(shape=[model.num_prototypes, 6],
-                                        fill_value=-1)
+        global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
+        global_min_fmap_patches = np.zeros(
+            [model_multi.module.num_prototypes,
+             model_multi.module.prototype_shape[1],
+             model_multi.module.prototype_shape[2],
+             model_multi.module.prototype_shape[3]])
 
-    search_batch_size = train_push_loader.batch_size     
+        proto_rf_boxes = np.full(shape=[model.num_prototypes, 6],
+                                    fill_value=-1)
+        proto_bound_boxes = np.full(shape=[model.num_prototypes, 6],
+                                            fill_value=-1)
 
-    for push_iter, search_batch_input in enumerate(train_push_loader):
-        '''
-        start_index_of_search keeps track of the index of the image
-        assigned to serve as prototype
-        '''
+        search_batch_size = train_push_loader.batch_size
 
-        start_index_of_search_batch = push_iter * search_batch_size
+        for push_iter, search_batch_input in enumerate(train_push_loader):
+            '''
+            start_index_of_search keeps track of the index of the image
+            assigned to serve as prototype
+            '''
 
-        update_prototypes_on_batch(search_batch_input=search_batch_input, 
-                                   start_index_of_search_batch=start_index_of_search_batch,
-                                   model=model_multi.module,
-                                   global_min_proto_dist=global_min_proto_dist,
-                                   global_proto_trace=global_proto_trace,
-                                   global_min_fmap_patches=global_min_fmap_patches,
-                                   proto_rf_boxes=proto_rf_boxes,
-                                   proto_bound_boxes=proto_bound_boxes,
-                                   K=1,
-                                   class_specific=True,
-                                   search_y=search_batch_input['image'][1],
-                                   prototype_layer_stride=1,
-                                   dir_for_saving_prototypes=proto_img_dir,
-                                   prototype_img_filename_prefix='prototype-img',
-                                   prototype_self_act_filename_prefix='prototype-self-act',
-                                   prototype_activation_function_in_numpy=None)
+            start_index_of_search_batch = push_iter * search_batch_size
+
+            update_prototypes_on_batch(search_batch_input=search_batch_input,
+                                       start_index_of_search_batch=start_index_of_search_batch,
+                                       model=model_multi.module,
+                                       global_min_proto_dist=global_min_proto_dist,
+                                       global_proto_trace=global_proto_trace,
+                                       global_min_fmap_patches=global_min_fmap_patches,
+                                       proto_rf_boxes=proto_rf_boxes,
+                                       proto_bound_boxes=proto_bound_boxes,
+                                       K=K,
+                                       class_specific=True,
+                                       search_y=search_batch_input['image'][1],
+                                       prototype_layer_stride=1,
+                                       dir_for_saving_prototypes=proto_img_dir,
+                                       prototype_img_filename_prefix='prototype-img',
+                                       prototype_self_act_filename_prefix='prototype-self-act',
+                                       prototype_activation_function_in_numpy=None)
 
     with open(proto_img_dir + '/proto_trace.txt', "a") as f:
         for i, l in enumerate(global_proto_trace):
@@ -927,9 +929,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                     pattern = f'*_p{j}*'
                     files_to_remove = glob.glob(os.path.join(dir_for_saving_prototypes, pattern))
                     for file in files_to_remove:
-                        print('removing ', file)
                         os.remove(file)
-
 
                     # save the numpy array of the prototype self activation
                     np.save(os.path.join(dir_for_saving_prototypes,
