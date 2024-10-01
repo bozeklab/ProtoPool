@@ -23,6 +23,23 @@ import cv2
 
 from utils import mixup_data, compute_proto_layer_rf_info_v2, compute_rf_prototype
 
+from torchvision import datasets
+
+
+class ImageFolderWithFilenames(datasets.ImageFolder):
+    def __init__(self, root, transform=None):
+        # Initialize the parent class with the provided root and transform
+        super().__init__(root, transform=transform)
+
+    def __getitem__(self, index):
+        # Get the original output from ImageFolder (image and label)
+        image, label = super().__getitem__(index)
+
+        # Get the image path and extract the filename (without extension)
+        path, _ = self.imgs[index]
+        filename = os.path.splitext(os.path.basename(path))[0]
+        # Return the image, label, and filename
+        return {'image': image, 'filename': filename}
 
 
 def save_model(model, path, epoch):
@@ -149,7 +166,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
             train_dataset, batch_size=args.batch_size, shuffle=True, drop_last=True,
             **kwargs)
 
-        train_push_dataset = datasets.ImageFolder(
+        train_push_dataset = ImageFolderWithFilenames(
             args.data_push,
 #            '/shared/sets/datasets/birds/train_birds/train_birds/train_birds/',
             transforms_push,
@@ -754,7 +771,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                                prototype_activation_function_in_numpy=None
                                ):
     model.eval()
-    search_batch = search_batch_input
+    search_batch = search_batch_input['image']
 
     with torch.no_grad():
         search_batch = search_batch.cuda()
@@ -798,6 +815,8 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
             proto_dist_j = proto_dist_[:, j]
 
         batch_min_proto_dist_j = np.amin(proto_dist_j)
+
+        filename_j = search_batch_input['filename'][batch_min_proto_dist_j]
 
         if batch_min_proto_dist_j < global_min_proto_dist[j]:
             batch_argmin_proto_dist_j = \
@@ -885,12 +904,12 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                 if prototype_self_act_filename_prefix is not None:
                     # save the numpy array of the prototype self activation
                     np.save(os.path.join(dir_for_saving_prototypes,
-                                         prototype_self_act_filename_prefix + str(j) + '.npy'),
+                                         prototype_self_act_filename_prefix + filename_j + str(j) + '.npy'),
                             proto_act_img_j)
                 if prototype_img_filename_prefix is not None:
                     # save the whole image containing the prototype as png
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + '-original' + str(j) + '.png'),
+                                            prototype_img_filename_prefix + '-original' + filename_j + str(j) + '.png'),
                                original_img_j,
                                vmin=0.0,
                                vmax=1.0)
@@ -904,7 +923,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
                     global_proto_trace[j] = {'cls': str(search_y[rf_prototype_j[0]].item()), 'index': rf_prototype_j[0] + start_index_of_search_batch}
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + '-original_with_self_act' + str(j) + '.png'),
+                                            prototype_img_filename_prefix + filename_j + '-original_with_self_act' + str(j) + '.png'),
                                overlayed_original_img_j,
                                vmin=0.0,
                                vmax=1.0)
@@ -912,25 +931,27 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                     # if different from the original (whole) image, save the prototype receptive field as png
                     if rf_img_j.shape[0] != original_img_size or rf_img_j.shape[1] != original_img_size:
                         plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                                prototype_img_filename_prefix + '-receptive_field' + str(j) + '.png'),
+                                                prototype_img_filename_prefix + filename_j + '-receptive_field' + str(j) + '.png'),
                                    rf_img_j,
                                    vmin=0.0,
                                    vmax=1.0)
+                        output_file = os.path.join(dir_for_saving_prototypes,
+                                                   prototype_img_filename_prefix + filename_j + '-receptive_field' + str(j) + '.npy')
+                        np.save(output_file, proto_bound_boxes)
                         overlayed_rf_img_j = overlayed_original_img_j[rf_prototype_j[1]:rf_prototype_j[2],
                                                                       rf_prototype_j[3]:rf_prototype_j[4]]
                         plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                                prototype_img_filename_prefix + '-receptive_field_with_self_act' + str(j) + '.png'),
+                                                prototype_img_filename_prefix + filename_j + '-receptive_field_with_self_act' + str(j) + '.png'),
                                    overlayed_rf_img_j,
                                    vmin=0.0,
                                    vmax=1.0)
                     
                     # save the prototype image (highly activated region of the whole image)
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + str(j) + '.png'),
+                                            prototype_img_filename_prefix + filename_j + str(j) + '.png'),
                                proto_img_j,
                                vmin=0.0,
                                vmax=1.0)
-
 
 
 if __name__ == '__main__':
