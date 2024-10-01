@@ -266,6 +266,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     model.conv1 = nn.Conv2d(3, 64, kernel_size=128, stride=2, padding=3, bias=False)
 
+
+
     model.to(device)
     if args.warmup:
         model.features.requires_grad_(False)
@@ -607,6 +609,9 @@ def learn_model(opt: Optional[List[str]]) -> None:
         start_index_of_search keeps track of the index of the image
         assigned to serve as prototype
         '''
+
+        print('!!!!!')
+        print(search_batch_input['image'])
 
         start_index_of_search_batch = push_iter * search_batch_size
 
