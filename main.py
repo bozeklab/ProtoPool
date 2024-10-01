@@ -777,6 +777,8 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                                prototype_activation_function_in_numpy=None
                                ):
     model.eval()
+    print('!!!')
+    print(search_batch_input)
     search_batch = search_batch_input['image']
 
     with torch.no_grad():
