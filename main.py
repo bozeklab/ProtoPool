@@ -618,7 +618,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
             start_index_of_search_batch = push_iter * search_batch_size
 
-            proto_img_dir_K = os.makedirs(os.path.join(proto_img_dir, K), exist_ok=True)
+            proto_img_dir_K = os.makedirs(os.path.join(proto_img_dir, str(K)), exist_ok=True)
 
             update_prototypes_on_batch(search_batch_input=search_batch_input,
                                        start_index_of_search_batch=start_index_of_search_batch,
