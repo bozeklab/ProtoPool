@@ -591,8 +591,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
     kn = list(range(1, 6))
     kn.reverse()
     for K in kn:
-        proto_img_dir_K = os.makedirs(os.path.join(proto_img_dir, f'{K}'), exist_ok=True)
-        print(os.path.join(os.path.join(proto_img_dir, f'{K}')))
+        proto_img_dir_K = os.path.join(proto_img_dir, f'{K}')
+        os.makedirs(proto_img_dir_K, exist_ok=True)
         global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
         for i in range(model_multi.module.num_prototypes):
             global_min_proto_dist[i] = []
