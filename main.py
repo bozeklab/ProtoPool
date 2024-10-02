@@ -591,7 +591,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
     kn = list(range(1, 6))
     kn.reverse()
     for K in kn:
-
+        proto_img_dir_K = os.makedirs(os.path.join(proto_img_dir, f'___K'), exist_ok=True)
+        print(os.path.join(proto_img_dir, f'___K'))
         global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
         for i in range(model_multi.module.num_prototypes):
             global_min_proto_dist[i] = []
@@ -618,7 +619,6 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
             start_index_of_search_batch = push_iter * search_batch_size
 
-            proto_img_dir_K = os.makedirs(os.path.join(proto_img_dir, str(K)), exist_ok=True)
 
             update_prototypes_on_batch(search_batch_input=search_batch_input,
                                        start_index_of_search_batch=start_index_of_search_batch,
