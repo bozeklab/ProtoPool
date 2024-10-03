@@ -853,7 +853,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
             print('!!!!')
             print(batch_min_proto_dist_j)
             batch_argmin_proto_dist_j = \
-                list(np.unravel_index(np.where(np.isclose(proto_dist_j, batch_min_proto_dist_j, atol=1e-4)[0]),
+                list(np.unravel_index(np.where(np.isclose(proto_dist_j, batch_min_proto_dist_j, atol=1e-1)[0]),
                                       proto_dist_j.shape))
 
             print(batch_argmin_proto_dist_j[0])
