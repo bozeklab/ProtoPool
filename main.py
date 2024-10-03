@@ -989,7 +989,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                     mask = transforms.Resize((original_img_j.shape[0], original_img_j.shape[1]))(mask)
                     mask_tensor = transforms.ToTensor()(mask)
                     print('!!!!')
-                    print(mask.shape)
+                    print(mask_tensor.shape)
                     mask_tensor = mask_tensor[:, proto_bound_j[0]: proto_bound_j[1], proto_bound_j[2]: proto_bound_j[3]]
                     mask_image = transforms.ToPILImage()(mask_tensor)
                     mask_image.save(os.path.join(dir_for_saving_prototypes,
