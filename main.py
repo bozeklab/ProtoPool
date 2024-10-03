@@ -843,8 +843,10 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                 found = True
                 batch_min_proto_dist_j = -global_min_proto_dist[j][0]
         elif batch_min_proto_dist_j < -global_min_proto_dist[j][0]:  # Compare with the largest of the k smallest
+            tmp = -global_min_proto_dist[j][0]
             heapq.heappop(global_min_proto_dist[j])
             heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
+            batch_min_proto_dist_j = tmp
             found = True
 
         if found:
