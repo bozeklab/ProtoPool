@@ -839,7 +839,9 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
         if len(global_min_proto_dist[j]) < K:
             heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
-            #found = True
+            if len(global_min_proto_dist[j]) == K:
+                found = True
+                batch_min_proto_dist_j = -global_min_proto_dist[j][0]
         elif batch_min_proto_dist_j < -global_min_proto_dist[j][0]:  # Compare with the largest of the k smallest
             heapq.heappop(global_min_proto_dist[j])
             heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
@@ -847,7 +849,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
         if found:
             batch_argmin_proto_dist_j = \
-                list(np.unravel_index(np.argmin(proto_dist_j, axis=None),
+                list(np.unravel_index(np.where(proto_dist_j == batch_min_proto_dist_j),
                                       proto_dist_j.shape))
 
             if class_specific:
