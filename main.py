@@ -852,6 +852,9 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                 list(np.unravel_index(np.where(proto_dist_j == batch_min_proto_dist_j),
                                       proto_dist_j.shape))
 
+            print('!!!!')
+            print(batch_argmin_proto_dist_j)
+
             if class_specific:
                 '''
                 change the argmin index from the index among
