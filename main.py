@@ -986,10 +986,13 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                     mask_filename = f"mask_{filename_j}.png"
                     mask_path = os.path.join('/data/pwojcik/mito_work/dataset_512_all/', mask_filename)
                     mask = Image.open(mask_path).convert("RGB")
-                    mask = transforms.Resize((original_img_j.shape[0], original_img_j[1].shape[1]))(mask)
-                    mask = mask[proto_bound_j[0]: proto_bound_j[1], proto_bound_j[2]: proto_bound_j[3], :]
-                    mask.save(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + filename_j + '_mask_p' + str(j) + '.png'))
+                    mask = transforms.Resize((original_img_j.shape[0], original_img_j.shape[1]))(mask)
+                    mask_tensor = transforms.ToTensor()(mask)
+                    mask_tensor = mask_tensor[:, proto_bound_j[0]: proto_bound_j[1], proto_bound_j[2]: proto_bound_j[3]]
+                    mask_image = transforms.ToPILImage()(mask_tensor)
+                    mask_image.save(os.path.join(dir_for_saving_prototypes,
+                                                 prototype_img_filename_prefix + filename_j + '_mask_p' + str(
+                                                     j) + '.png'))
                     #msk_tensor = transforms.ToTensor()(mask)
                     #bool_mask = create_boolean_mask(msk_tensor)
 
