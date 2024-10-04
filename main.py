@@ -610,7 +610,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     heaps = []
     # allocate an array of n_prototypes number of heaps
-    for _ in range(n_prototypes):
+    for _ in range(model.num_prototypes):
         # a heap in python is just a maintained list
         heaps.append([])
 
