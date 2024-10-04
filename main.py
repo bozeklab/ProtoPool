@@ -671,6 +671,9 @@ def learn_model(opt: Optional[List[str]]) -> None:
         assert len(h) == 5
         for k in h:
             img = h[k].patch
+            mask = h[k].mask_patch
+            print(img.shape)
+            print(mask.shape)
             filename = heaph[k].filename
             print(filename)
 
