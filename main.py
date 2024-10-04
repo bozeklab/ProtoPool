@@ -48,7 +48,7 @@ class HeapPatch:
     def __init__(self, patch, filename, distance, mask_patch):
         self.patch = patch
         self.filename = filename
-        self.mask_path = mask_path
+        self.mask_patch = mask_patch
         self.distance = distance
 
     def __lt__(self, other):
