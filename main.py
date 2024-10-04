@@ -45,9 +45,10 @@ class ImageFolderWithFilenames(datasets.ImageFolder):
 
 
 class HeapPatch:
-    def __init__(self, patch, filename, distance):
+    def __init__(self, patch, filename, distance, mask_patch):
         self.patch = patch
         self.filename = filename
+        self.mask_path = mask_path
         self.distance = distance
 
     def __lt__(self, other):
@@ -668,9 +669,9 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     for h in heaps:
         assert len(h) == 5
-        for k in heaps[h]:
-            img = heap[h][k].patch
-            filename = heap[h][k].filename
+        for k in h:
+            img = h[k].patch
+            filename = heaph[k].filename
             print(filename)
 
     print('Fine-tuning')
@@ -1129,7 +1130,14 @@ def update_prototypes_on_batch_heaps(search_batch_input, start_index_of_search_b
             proto_img_j = original_img_j[proto_bound_j[0]:proto_bound_j[1],
                           proto_bound_j[2]:proto_bound_j[3], :]
 
-            he = HeapPatch(distance=-heap_dist, patch=proto_img_j, filename=filename_j)
+            mask_filename = f"mask_{filename_j}.png"
+            mask_path = os.path.join('/data/pwojcik/mito_work/dataset_512_all/', mask_filename)
+            mask = Image.open(mask_path).convert("RGB")
+            mask = transforms.Resize((original_img_j.shape[0], original_img_j.shape[1]))(mask)
+            mask_tensor = transforms.ToTensor()(mask)
+            mask_tensor = mask_tensor[:, proto_bound_j[0]: proto_bound_j[1], proto_bound_j[2]: proto_bound_j[3]]
+
+            he = HeapPatch(distance=-heap_dist, patch=proto_img_j, mask_path=mask_tensor, filename=filename_j)
             if len(heaps[j]) < 5:
                 heapq.heappush(heaps[j], he)
             else:
