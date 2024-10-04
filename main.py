@@ -669,7 +669,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
     # ===================fine tune=====================
 
     for hidx, h in enumerate(heaps):
-        print(len(h))
+        if len(h) == 0:
+            continue
         h.sort()
         for hh in h:
             img = hh.patch
