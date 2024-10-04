@@ -670,6 +670,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     for hidx, h in enumerate(heaps):
         print(len(h))
+        h.sort()
         for hh in h:
             img = hh.patch
             mask = hh.mask_patch
@@ -1067,8 +1068,6 @@ def update_prototypes_on_batch_heaps(search_batch_input, start_index_of_search_b
             proto_dist_j = proto_dist_[:, j]
 
         batch_min_proto_dist_j = np.amin(proto_dist_j)
-
-        heap_dist = batch_min_proto_dist_j
 
         if (len(heaps[j]) < 5) or (batch_min_proto_dist_j < -heaps[j][0].distance):
             batch_argmin_proto_dist_j = \
