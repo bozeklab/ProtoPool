@@ -1128,6 +1128,7 @@ def update_prototypes_on_batch_heaps(search_batch_input, start_index_of_search_b
                 heapq.heappush(heaps[j], he)
             else:
                 heapq.heappop(heaps[j])
+                heapq.heappush(heaps[j], he)
 
 
 if __name__ == '__main__':
