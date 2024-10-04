@@ -48,7 +48,7 @@ class HeapPatch:
     def __init__(self, patch, filename, distance):
         self.patch = patch
         self.filename = filename
-        self._distance = distance
+        self.distance = distance
 
     def __lt__(self, other):
         return self.distance < other.distance
