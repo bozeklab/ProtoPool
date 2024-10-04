@@ -4,6 +4,7 @@ import glob
 from datetime import datetime
 from pathlib import Path
 import heapq
+from PIL import Image
 from typing import List, Optional
 
 import matplotlib.pyplot as plt
