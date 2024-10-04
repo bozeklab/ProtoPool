@@ -670,12 +670,12 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     for hidx, h in enumerate(heaps):
         assert len(h) == 5
-        for k in h:
-            img = h[k].patch
-            mask = h[k].mask_patch
+        for hh in h:
+            img = hh.patch
+            mask = hh.mask_patch
             print(img.shape)
             print(mask.shape)
-            filename = heaph[k].filename
+            filename = hh.filename
             print(filename)
 
     print('Fine-tuning')
