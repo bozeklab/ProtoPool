@@ -1069,6 +1069,8 @@ def update_prototypes_on_batch_heaps(search_batch_input, start_index_of_search_b
 
         batch_min_proto_dist_j = np.amin(proto_dist_j)
 
+        heap_dist = batch_min_proto_dist_j
+
         if (len(heaps[j]) < 5) or (batch_min_proto_dist_j < -heaps[j][0].distance):
             batch_argmin_proto_dist_j = \
                 list(np.unravel_index(np.argmin(proto_dist_j, axis=None),
