@@ -688,7 +688,6 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     # ===================fine tune=====================
 
-    bool_mask = create_boolean_mask(msk_tensor)
 
 
     for hidx, h in enumerate(heaps):
@@ -698,7 +697,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
         for hh in h:
             img = hh.patch
             mask = hh.mask_patch
-            num_white_pixels = torch.sum(mask).item()
+            bool_mask = create_boolean_mask(mask)
+            num_white_pixels = torch.sum(bool_mask).item()
             jaccard.append(num_white_pixels / (bool_mask.shape[0] * bool_mask.shape[1]))
             print(img.shape)
             print(mask.shape)
