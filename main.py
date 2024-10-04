@@ -3,8 +3,6 @@ import os
 import glob
 from datetime import datetime
 from pathlib import Path
-import heapq
-from PIL import Image
 from typing import List, Optional
 
 import matplotlib.pyplot as plt
@@ -76,7 +74,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     parser.add_argument('--data_push', help='Path to push data',
                         default='/data/pwojcik/mito_work/dataset_512_protopool/train')
     parser.add_argument('--data_test', help='Path to tets data',
-                             default='/data/pwojcik/mito_work/dataset_512_protopool/test')
+                        default='/data/pwojcik/mito_work/dataset_512_protopool/test')
     parser.add_argument('--batch_size', type=int, default=80,
                         help='input batch size for training (default: 80)')
     parser.add_argument('--lr', type=float, default=0.001,
@@ -115,7 +113,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     parser.add_argument('--inat', action='store_true')
     parser.add_argument('--mixup_data', action='store_true')
     parser.add_argument('--push_only', action='store_true')
-    parser.add_argument('--gpuid', nargs=1, type=str, default='0') # python3 main.py -gpuid=0,1,2,3
+    parser.add_argument('--gpuid', nargs=1, type=str, default='0')  # python3 main.py -gpuid=0,1,2,3
     parser.add_argument('--proto_img_dir', type=str, default='img')
     parser.add_argument('--pp_ortho', action='store_true')
     parser.add_argument('--pp_gumbel', action='store_true')
@@ -135,8 +133,9 @@ def learn_model(opt: Optional[List[str]]) -> None:
     epoch_interval = args.gumbel_time
     alpha = (end_val / start_val) ** 2 / epoch_interval
 
-    def lambda1(epoch): return start_val * np.sqrt(alpha *
-                                                   (epoch)) if epoch < epoch_interval else end_val
+    def lambda1(epoch):
+        return start_val * np.sqrt(alpha *
+                                   (epoch)) if epoch < epoch_interval else end_val
 
     clst_weight = 0.8
     sep_weight = -0.08
@@ -151,13 +150,13 @@ def learn_model(opt: Optional[List[str]]) -> None:
         kwargs.update({'num_workers': 9, 'pin_memory': True})
 
     transforms_train_test = transforms.Compose([
-        #transforms.Resize((224, 224)),
+        # transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ])
 
     transforms_push = transforms.Compose([
-        #transforms.Resize((224, 224)),
+        # transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ])
@@ -165,7 +164,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     if args.data_type == 'birds':
         train_dataset = datasets.ImageFolder(
             args.data_train,
-#            '/shared/sets/datasets/birds/train_birds_augmented/train_birds_augmented/train_birds_augmented/',
+            #            '/shared/sets/datasets/birds/train_birds_augmented/train_birds_augmented/train_birds_augmented/',
             transforms_train_test,
         )
         train_loader = torch.utils.data.DataLoader(
@@ -174,7 +173,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
         train_push_dataset = ImageFolderWithFilenames(
             args.data_push,
-#            '/shared/sets/datasets/birds/train_birds/train_birds/train_birds/',
+            #            '/shared/sets/datasets/birds/train_birds/train_birds/train_birds/',
             transforms_push,
         )
         train_push_loader = torch.utils.data.DataLoader(
@@ -183,7 +182,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
         test_dataset = datasets.ImageFolder(
             args.data_test,
-#            '/shared/sets/datasets/birds/test_birds/test_birds/test_birds/',
+            #            '/shared/sets/datasets/birds/test_birds/test_birds/test_birds/',
             transforms_train_test,
         )
         test_loader = torch.utils.data.DataLoader(
@@ -193,7 +192,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     elif args.data_type == 'cars':
         train_dataset = datasets.ImageFolder(
             args.data_train,
-#            '/shared/sets/datasets/stanford_cars/train_cars_augmented/',
+            #            '/shared/sets/datasets/stanford_cars/train_cars_augmented/',
             transforms_train_test,
         )
         train_loader = torch.utils.data.DataLoader(
@@ -202,7 +201,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
         train_push_dataset = datasets.ImageFolder(
             args.data_push,
-#            '/shared/sets/datasets/stanford_cars/train_cars/',
+            #            '/shared/sets/datasets/stanford_cars/train_cars/',
             transforms_push,
         )
         train_push_loader = torch.utils.data.DataLoader(
@@ -211,7 +210,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
         test_dataset = datasets.ImageFolder(
             args.data_test,
-#            '/shared/sets/datasets/stanford_cars/test_cars/',
+            #            '/shared/sets/datasets/stanford_cars/test_cars/',
             transforms_train_test,
         )
         test_loader = torch.utils.data.DataLoader(
@@ -229,7 +228,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
         train_push_dataset = ImageFolderWithFilenames(
             args.data_push,
-#            '/shared/sets/datasets/birds/train_birds/train_birds/train_birds/',
+            #            '/shared/sets/datasets/birds/train_birds/train_birds/train_birds/',
             transforms_push,
         )
 
@@ -263,12 +262,10 @@ def learn_model(opt: Optional[List[str]]) -> None:
     )
     if args.ppnet_path:
         model.load_state_dict(torch.load(args.ppnet_path, map_location='cpu')[
-                              'model_state_dict'], strict=True)
+                                  'model_state_dict'], strict=True)
         print('Successfully loaded ' + args.ppnet_path)
 
     model.conv1 = nn.Conv2d(3, 64, kernel_size=128, stride=2, padding=3, bias=False)
-
-
 
     model.to(device)
     if args.warmup:
@@ -318,7 +315,6 @@ def learn_model(opt: Optional[List[str]]) -> None:
         proto_img_dir = f'{args.results}/img_proto/{info}'
         Path(proto_img_dir).mkdir(parents=True, exist_ok=True)
     Path(dir_checkpoint).mkdir(parents=True, exist_ok=True)
-    
 
     ####################################
     #          learning model          #
@@ -367,21 +363,22 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     # ===================forward=====================
                     prob, min_distances, proto_presence = model_multi(
                         data, gumbel_scale=gumbel_scalar)
-                    np.savez_compressed(f'{dir_checkpoint}/pp_{epoch * 80 + i}.pth', proto_presence.detach().cpu().numpy())
-
+                    np.savez_compressed(f'{dir_checkpoint}/pp_{epoch * 80 + i}.pth',
+                                        proto_presence.detach().cpu().numpy())
 
                     if args.mixup_data:
                         entropy_loss = lam * \
-                            criterion(prob, targets_a) + (1 - lam) * \
-                            criterion(prob, targets_b)
+                                       criterion(prob, targets_a) + (1 - lam) * \
+                                       criterion(prob, targets_b)
                     else:
                         entropy_loss = criterion(prob, label)
                     orthogonal_loss = torch.Tensor([0]).cuda()
                     if args.pp_ortho:
                         for c in range(0, model_multi.module.proto_presence.shape[0], 1000):
                             orthogonal_loss_p = \
-                                torch.nn.functional.cosine_similarity(model_multi.module.proto_presence.unsqueeze(2)[c:c+1000],
-                                                                      model_multi.module.proto_presence.unsqueeze(-1)[c:c+1000], dim=1).sum()
+                                torch.nn.functional.cosine_similarity(
+                                    model_multi.module.proto_presence.unsqueeze(2)[c:c + 1000],
+                                    model_multi.module.proto_presence.unsqueeze(-1)[c:c + 1000], dim=1).sum()
                             orthogonal_loss += orthogonal_loss_p
                         orthogonal_loss = orthogonal_loss / (args.num_descriptive * args.num_classes) - 1
 
@@ -389,23 +386,24 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     inverted_proto_presence = 1 - proto_presence
                     clst_loss_val = \
                         dist_loss(model, min_distances, proto_presence,
-                                  args.num_descriptive)  
+                                  args.num_descriptive)
                     sep_loss_val = dist_loss(model, min_distances, inverted_proto_presence,
-                                             args.num_prototypes - args.num_descriptive)  
+                                             args.num_prototypes - args.num_descriptive)
 
                     prototypes_of_correct_class = proto_presence.sum(
                         dim=-1).detach()
                     prototypes_of_wrong_class = 1 - prototypes_of_correct_class
                     avg_separation_cost = \
-                        torch.sum(min_distances * prototypes_of_wrong_class, dim=1) / torch.sum(prototypes_of_wrong_class,
-                                                                                                dim=1)
+                        torch.sum(min_distances * prototypes_of_wrong_class, dim=1) / torch.sum(
+                            prototypes_of_wrong_class,
+                            dim=1)
                     avg_separation_cost = torch.mean(avg_separation_cost)
 
                     l1_mask = 1 - \
-                        torch.t(model.prototype_class_identity).cuda()
+                              torch.t(model.prototype_class_identity).cuda()
                     l1 = (model.last_layer.weight * l1_mask).norm(p=1)
                     loss = entropy_loss + clst_loss_val * clst_weight + \
-                        sep_loss_val * sep_weight + 1e-4 * l1 + orthogonal_loss
+                           sep_loss_val * sep_weight + 1e-4 * l1 + orthogonal_loss
 
                     # ===================backward====================
                     optimizer.zero_grad()
@@ -453,12 +451,13 @@ def learn_model(opt: Optional[List[str]]) -> None:
                     entropy_loss = loss
 
                     orthogonal_loss = 0
-                    orthogonal_loss = torch.Tensor([0]).cuda()                                                                                                                                            
-                    if args.pp_ortho: 
+                    orthogonal_loss = torch.Tensor([0]).cuda()
+                    if args.pp_ortho:
                         for c in range(0, model_multi.module.proto_presence.shape[0], 1000):
                             orthogonal_loss_p = \
-                                torch.nn.functional.cosine_similarity(model_multi.module.proto_presence.unsqueeze(2)[c:c+1000],
-                                                                      model_multi.module.proto_presence.unsqueeze(-1)[c:c+1000], dim=1).sum()
+                                torch.nn.functional.cosine_similarity(
+                                    model_multi.module.proto_presence.unsqueeze(2)[c:c + 1000],
+                                    model_multi.module.proto_presence.unsqueeze(-1)[c:c + 1000], dim=1).sum()
                             orthogonal_loss += orthogonal_loss_p
                         orthogonal_loss = orthogonal_loss / (args.num_descriptive * args.num_classes) - 1
                     inverted_proto_presence = 1 - proto_presence
@@ -468,8 +467,10 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
                     proto_presence = proto_presence[label_p]
                     inverted_proto_presence = inverted_proto_presence[label_p]
-                    clst_loss_val = dist_loss(model_multi.module, min_distances, proto_presence, args.num_descriptive) * clst_weight
-                    sep_loss_val = dist_loss(model_multi.module, min_distances, inverted_proto_presence, args.num_prototypes - args.num_descriptive, sep=True) * sep_weight
+                    clst_loss_val = dist_loss(model_multi.module, min_distances, proto_presence,
+                                              args.num_descriptive) * clst_weight
+                    sep_loss_val = dist_loss(model_multi.module, min_distances, inverted_proto_presence,
+                                             args.num_prototypes - args.num_descriptive, sep=True) * sep_weight
                     loss = entropy_loss + clst_loss_val + sep_loss_val + orthogonal_loss + 1e-4 * l1
                     tst_loss += loss.item()
 
@@ -589,54 +590,44 @@ def learn_model(opt: Optional[List[str]]) -> None:
     writer.add_image('Confusion Matrix', img)
     plt.close(fig)
 
-    kn = list(range(1, 6))
-    kn.reverse()
-    for K in kn:
-        proto_img_dir_K = os.path.join(proto_img_dir, f'{K}')
-        os.makedirs(proto_img_dir_K, exist_ok=True)
-        global_min_proto_dist = [None for _ in range(model_multi.module.num_prototypes)]
-        for i in range(model_multi.module.num_prototypes):
-            global_min_proto_dist[i] = []
+    global_min_proto_dist = np.full(model_multi.module.num_prototypes, np.inf)
+    global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
+    global_min_fmap_patches = np.zeros(
+        [model_multi.module.num_prototypes,
+         model_multi.module.prototype_shape[1],
+         model_multi.module.prototype_shape[2],
+         model_multi.module.prototype_shape[3]])
 
-        global_proto_trace = [0 for i in range(model_multi.module.num_prototypes)]
-        global_min_fmap_patches = np.zeros(
-            [model_multi.module.num_prototypes,
-             model_multi.module.prototype_shape[1],
-             model_multi.module.prototype_shape[2],
-             model_multi.module.prototype_shape[3]])
+    proto_rf_boxes = np.full(shape=[model.num_prototypes, 6],
+                             fill_value=-1)
+    proto_bound_boxes = np.full(shape=[model.num_prototypes, 6],
+                                fill_value=-1)
 
-        proto_rf_boxes = np.full(shape=[model.num_prototypes, 6],
-                                    fill_value=-1)
-        proto_bound_boxes = np.full(shape=[model.num_prototypes, 6],
-                                            fill_value=-1)
+    search_batch_size = train_push_loader.batch_size
 
-        search_batch_size = train_push_loader.batch_size
+    for push_iter, search_batch_input in enumerate(train_push_loader):
+        '''
+        start_index_of_search keeps track of the index of the image
+        assigned to serve as prototype
+        '''
 
-        for push_iter, search_batch_input in enumerate(train_push_loader):
-            '''
-            start_index_of_search keeps track of the index of the image
-            assigned to serve as prototype
-            '''
+        start_index_of_search_batch = push_iter * search_batch_size
 
-            start_index_of_search_batch = push_iter * search_batch_size
-
-
-            update_prototypes_on_batch(search_batch_input=search_batch_input,
-                                       start_index_of_search_batch=start_index_of_search_batch,
-                                       model=model_multi.module,
-                                       global_min_proto_dist=global_min_proto_dist,
-                                       global_proto_trace=global_proto_trace,
-                                       global_min_fmap_patches=global_min_fmap_patches,
-                                       proto_rf_boxes=proto_rf_boxes,
-                                       proto_bound_boxes=proto_bound_boxes,
-                                       K=K,
-                                       class_specific=True,
-                                       search_y=search_batch_input['image'][1],
-                                       prototype_layer_stride=1,
-                                       dir_for_saving_prototypes=proto_img_dir_K,
-                                       prototype_img_filename_prefix='prototype-img',
-                                       prototype_self_act_filename_prefix='prototype-self-act',
-                                       prototype_activation_function_in_numpy=None)
+        update_prototypes_on_batch(search_batch_input=search_batch_input,
+                                   start_index_of_search_batch=start_index_of_search_batch,
+                                   model=model_multi.module,
+                                   global_min_proto_dist=global_min_proto_dist,
+                                   global_proto_trace=global_proto_trace,
+                                   global_min_fmap_patches=global_min_fmap_patches,
+                                   proto_rf_boxes=proto_rf_boxes,
+                                   proto_bound_boxes=proto_bound_boxes,
+                                   class_specific=True,
+                                   search_y=search_batch_input['image'][1],
+                                   prototype_layer_stride=1,
+                                   dir_for_saving_prototypes=proto_img_dir,
+                                   prototype_img_filename_prefix='prototype-img',
+                                   prototype_self_act_filename_prefix='prototype-self-act',
+                                   prototype_activation_function_in_numpy=None)
 
     with open(proto_img_dir + '/proto_trace.txt', "a") as f:
         for i, l in enumerate(global_proto_trace):
@@ -669,8 +660,8 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
             if args.mixup_data:
                 entropy_loss = lam * \
-                    criterion(prob, targets_a) + (1 - lam) * \
-                    criterion(prob, targets_b)
+                               criterion(prob, targets_a) + (1 - lam) * \
+                               criterion(prob, targets_b)
             else:
                 entropy_loss = criterion(prob, label)
 
@@ -778,7 +769,6 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                                global_min_fmap_patches,  # this will be updated
                                proto_rf_boxes,  # this will be updated
                                proto_bound_boxes,  # this will be updated
-                               K=1,
                                class_specific=True,
                                search_y=None,  # required if class_specific == True
                                num_classes=None,  # required if class_specific == True
@@ -835,28 +825,10 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
         batch_min_proto_dist_j = np.amin(proto_dist_j)
 
-        found = False
-
-        if len(global_min_proto_dist[j]) < K:
-            heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
-            if len(global_min_proto_dist[j]) == K:
-                found = True
-                batch_min_proto_dist_j = -global_min_proto_dist[j][0]
-        elif batch_min_proto_dist_j < -global_min_proto_dist[j][0]:  # Compare with the largest of the k smallest
-            tmp = -global_min_proto_dist[j][0]
-            heapq.heappop(global_min_proto_dist[j])
-            heapq.heappush(global_min_proto_dist[j], -batch_min_proto_dist_j)
-            batch_min_proto_dist_j = tmp
-            found = True
-
-        if found:
-            print('!!!!')
-            print(batch_min_proto_dist_j)
+        if batch_min_proto_dist_j < global_min_proto_dist[j]:
             batch_argmin_proto_dist_j = \
-                list(np.unravel_index(np.where(np.isclose(proto_dist_j, batch_min_proto_dist_j, atol=1e-1)[0]),
+                list(np.unravel_index(np.argmin(proto_dist_j, axis=None),
                                       proto_dist_j.shape))
-
-            print(batch_argmin_proto_dist_j[0])
 
             if class_specific:
                 '''
@@ -870,26 +842,26 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
             # retrieve the corresponding feature map patch
             img_index_in_batch = batch_argmin_proto_dist_j[0]
             fmap_height_start_index = batch_argmin_proto_dist_j[1] * \
-                prototype_layer_stride
+                                      prototype_layer_stride
             fmap_height_end_index = fmap_height_start_index + proto_h
             fmap_width_start_index = batch_argmin_proto_dist_j[2] * \
-                prototype_layer_stride
+                                     prototype_layer_stride
             fmap_width_end_index = fmap_width_start_index + proto_w
 
             batch_min_fmap_patch_j = protoL_input_[img_index_in_batch,
-                                                   :,
-                                                   fmap_height_start_index:fmap_height_end_index,
-                                                   fmap_width_start_index:fmap_width_end_index]
+                                     :,
+                                     fmap_height_start_index:fmap_height_end_index,
+                                     fmap_width_start_index:fmap_width_end_index]
 
-            #global_min_proto_dist[j] = batch_min_proto_dist_j
+            global_min_proto_dist[j] = batch_min_proto_dist_j
             global_min_fmap_patches[j] = batch_min_fmap_patch_j
 
-           # get the receptive field boundary of the image patch
+            # get the receptive field boundary of the image patch
             # that generates the representation
             # protoL_rf_info = model.proto_layer_rf_info
             layer_filter_sizes, layer_strides, layer_paddings = model.features.conv_info()
             protoL_rf_info = compute_proto_layer_rf_info_v2(512, layer_filter_sizes, layer_strides, layer_paddings,
-                                           prototype_kernel_size=1)
+                                                            prototype_kernel_size=1)
             rf_prototype_j = compute_rf_prototype(search_batch.size(2), batch_argmin_proto_dist_j, protoL_rf_info)
 
             filename_j = search_batch_input['filename'][rf_prototype_j[0]]
@@ -899,11 +871,11 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
             original_img_j = np.transpose(original_img_j, (1, 2, 0))
             original_img_size = original_img_j.shape[0]
             original_img_j = (original_img_j - np.min(original_img_j)) / np.max(original_img_j - np.min(original_img_j))
-            
+
             # crop out the receptive field
             rf_img_j = original_img_j[rf_prototype_j[1]:rf_prototype_j[2],
-                                      rf_prototype_j[3]:rf_prototype_j[4], :]
-            
+                       rf_prototype_j[3]:rf_prototype_j[4], :]
+
             # save the prototype receptive field information
             proto_rf_boxes[j, 0] = rf_prototype_j[0] + start_index_of_search_batch
             proto_rf_boxes[j, 1] = rf_prototype_j[1]
@@ -926,7 +898,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
             proto_bound_j = find_high_activation_crop(upsampled_act_img_j)
             # crop out the image patch with high activation as prototype image
             proto_img_j = original_img_j[proto_bound_j[0]:proto_bound_j[1],
-                                         proto_bound_j[2]:proto_bound_j[3], :]
+                          proto_bound_j[2]:proto_bound_j[3], :]
 
             # save the prototype boundary (rectangular boundary of highly activated region)
             proto_bound_boxes[j, 0] = proto_rf_boxes[j, 0]
@@ -939,7 +911,7 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
 
             if dir_for_saving_prototypes is not None:
                 if prototype_self_act_filename_prefix is not None:
-                    pattern = f'*_p{j}*'
+                    pattern = f'p_{j}*'
                     files_to_remove = glob.glob(os.path.join(dir_for_saving_prototypes, pattern))
                     for file in files_to_remove:
                         os.remove(file)
@@ -951,61 +923,48 @@ def update_prototypes_on_batch(search_batch_input, start_index_of_search_batch,
                 if prototype_img_filename_prefix is not None:
                     # save the whole image containing the prototype as png
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + '-original' + filename_j + '_p' + str(j) + '.png'),
+                                            prototype_img_filename_prefix + '-original' + filename_j + '_p' + str(
+                                                j) + '.png'),
                                original_img_j,
                                vmin=0.0,
                                vmax=1.0)
                     # overlay (upsampled) self activation on original image and save the result
                     rescaled_act_img_j = upsampled_act_img_j - np.amin(upsampled_act_img_j)
                     rescaled_act_img_j = rescaled_act_img_j / np.amax(rescaled_act_img_j)
-                    heatmap = cv2.applyColorMap(np.uint8(255*rescaled_act_img_j), cv2.COLORMAP_JET)
+                    heatmap = cv2.applyColorMap(np.uint8(255 * rescaled_act_img_j), cv2.COLORMAP_JET)
                     heatmap = np.float32(heatmap) / 255
-                    heatmap = heatmap[...,::-1]
+                    heatmap = heatmap[..., ::-1]
                     overlayed_original_img_j = 0.5 * original_img_j + 0.3 * heatmap
 
-                    global_proto_trace[j] = {'cls': str(search_y[rf_prototype_j[0]].item()), 'index': rf_prototype_j[0] + start_index_of_search_batch}
+                    global_proto_trace[j] = {'cls': str(search_y[rf_prototype_j[0]].item()),
+                                             'index': rf_prototype_j[0] + start_index_of_search_batch}
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                            prototype_img_filename_prefix + filename_j + '-original_with_self_act_p' + str(j) + '.png'),
+                                            prototype_img_filename_prefix + filename_j + '-original_with_self_act_p' + str(
+                                                j) + '.png'),
                                overlayed_original_img_j,
                                vmin=0.0,
                                vmax=1.0)
-                    
+
                     # if different from the original (whole) image, save the prototype receptive field as png
                     if rf_img_j.shape[0] != original_img_size or rf_img_j.shape[1] != original_img_size:
                         plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                                prototype_img_filename_prefix + filename_j + '-receptive_field_p' + str(j) + '.png'),
+                                                prototype_img_filename_prefix + filename_j + '-receptive_field_p' + str(
+                                                    j) + '.png'),
                                    rf_img_j,
                                    vmin=0.0,
                                    vmax=1.0)
                         output_file = os.path.join(dir_for_saving_prototypes,
-                                                   prototype_img_filename_prefix + filename_j + '-receptive_field_p' + str(j) + '.npy')
+                                                   prototype_img_filename_prefix + filename_j + '-receptive_field_p' + str(
+                                                       j) + '.npy')
                         np.save(output_file, proto_bound_boxes)
                         overlayed_rf_img_j = overlayed_original_img_j[rf_prototype_j[1]:rf_prototype_j[2],
-                                                                      rf_prototype_j[3]:rf_prototype_j[4]]
-
-
-
+                                             rf_prototype_j[3]:rf_prototype_j[4]]
                         plt.imsave(os.path.join(dir_for_saving_prototypes,
-                                                prototype_img_filename_prefix + filename_j + '-receptive_field_with_self_act_p' + str(j) + '.png'),
+                                                prototype_img_filename_prefix + filename_j + '-receptive_field_with_self_act_p' + str(
+                                                    j) + '.png'),
                                    overlayed_rf_img_j,
                                    vmin=0.0,
                                    vmax=1.0)
-
-                    mask_filename = f"mask_{filename_j}.png"
-                    mask_path = os.path.join('/data/pwojcik/mito_work/dataset_512_all/', mask_filename)
-                    mask = Image.open(mask_path).convert("RGB")
-                    mask = transforms.Resize((original_img_j.shape[0], original_img_j.shape[1]))(mask)
-                    mask_tensor = transforms.ToTensor()(mask)
-                    print('!!!!')
-                    print(mask_tensor.shape)
-                    mask_tensor = mask_tensor[:, proto_bound_j[0]: proto_bound_j[1], proto_bound_j[2]: proto_bound_j[3]]
-                    mask_image = transforms.ToPILImage()(mask_tensor)
-                    mask_image.save(os.path.join(dir_for_saving_prototypes,
-                                                 prototype_img_filename_prefix + filename_j + '_mask_p' + str(
-                                                     j) + '.png'))
-                    #msk_tensor = transforms.ToTensor()(mask)
-                    #bool_mask = create_boolean_mask(msk_tensor)
-
 
                     # save the prototype image (highly activated region of the whole image)
                     plt.imsave(os.path.join(dir_for_saving_prototypes,
