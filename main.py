@@ -4,6 +4,7 @@ import glob
 from datetime import datetime
 from pathlib import Path
 import heapq
+import torchvision.transforms.functional as F
 from PIL import Image
 from typing import List, Optional
 
