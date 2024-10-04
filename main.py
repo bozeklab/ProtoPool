@@ -689,7 +689,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     # ===================fine tune=====================
 
-
+    jaccard = []
 
     for hidx, h in enumerate(heaps):
         if len(h) == 0:
