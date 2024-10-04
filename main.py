@@ -635,7 +635,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
                                          start_index_of_search_batch=start_index_of_search_batch,
                                          model=model_multi.module,
                                          class_specific=True,
-                                         search_y=None,  # required if class_specific == True
+                                         search_y=search_batch_input['image'][1],  # required if class_specific == True
                                          prototype_layer_stride=1,
                                          prototype_activation_function_in_numpy=None,
                                          heaps=heaps)
