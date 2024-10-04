@@ -45,8 +45,9 @@ class ImageFolderWithFilenames(datasets.ImageFolder):
 
 
 class HeapPatch:
-    def __init__(self, patch,  distance):
+    def __init__(self, patch, filename, distance):
         self.patch = patch
+        self.filename = filename
         self.negative_distance = distance
 
     def __lt__(self, other):
@@ -1122,7 +1123,7 @@ def update_prototypes_on_batch_heaps(search_batch_input, start_index_of_search_b
             proto_img_j = original_img_j[proto_bound_j[0]:proto_bound_j[1],
                           proto_bound_j[2]:proto_bound_j[3], :]
 
-            he = HeapPatch(distance=-heap_dist, patch=proto_img_j)
+            he = HeapPatch(distance=-heap_dist, patch=proto_img_j, filename=filename_j)
             if len(heaps[j] < 5):
                 heapq.heappush(heaps[j], he)
             else:
