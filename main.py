@@ -48,10 +48,10 @@ class HeapPatch:
     def __init__(self, patch, filename, distance):
         self.patch = patch
         self.filename = filename
-        self.negative_distance = distance
+        self._distance = distance
 
     def __lt__(self, other):
-        return self.negative_distance < other.negative_distance
+        return self.distance < other.distance
 
 
 def save_model(model, path, epoch):
