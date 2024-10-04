@@ -669,7 +669,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
     # ===================fine tune=====================
 
     for hidx, h in enumerate(heaps):
-        assert len(h) == 5
+        print(len(h))
         for hh in h:
             img = hh.patch
             mask = hh.mask_patch
@@ -677,6 +677,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
             print(mask.shape)
             filename = hh.filename
             print(filename)
+        print('----')
 
     print('Fine-tuning')
     max_val_tst = 0
