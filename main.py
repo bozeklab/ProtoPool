@@ -654,8 +654,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
                                    dir_for_saving_prototypes=proto_img_dir,
                                    prototype_img_filename_prefix='prototype-img',
                                    prototype_self_act_filename_prefix='prototype-self-act',
-                                   prototype_activation_function_in_numpy=None,
-                                   heaps=heaps)
+                                   prototype_activation_function_in_numpy=None)
 
     with open(proto_img_dir + '/proto_trace.txt', "a") as f:
         for i, l in enumerate(global_proto_trace):
@@ -666,6 +665,13 @@ def learn_model(opt: Optional[List[str]]) -> None:
     model_multi.module.prototype_vectors.data.copy_(torch.tensor(prototype_update, dtype=torch.float32).cuda())
 
     # ===================fine tune=====================
+
+    for h in heaps:
+        assert len(h) == 5
+        for k in heap[h]:
+            img = heap[h][k].patch
+            filename = heap[h][k].filename
+            print(filename)
 
     print('Fine-tuning')
     max_val_tst = 0
