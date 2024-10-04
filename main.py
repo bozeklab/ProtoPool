@@ -668,7 +668,7 @@ def learn_model(opt: Optional[List[str]]) -> None:
 
     for h in heaps:
         assert len(h) == 5
-        for k in heap[h]:
+        for k in heaps[h]:
             img = heap[h][k].patch
             filename = heap[h][k].filename
             print(filename)
