@@ -11,7 +11,7 @@ Minimal evaluation script for ProtoPool/PrototypeChooser that:
 
 Usage example:
 
-python proto_activation_single_image.py \
+python local.py \
   --ckpt /data/pwojcik/ProtoPool/results/checkpoint/mito_descriptive-10_prototypes-50_lr-0.001_resnet18_True_log_log_warmup_ll_seed-0_2024-10-04_184840/best_model_push.pth \
   --image /data/pwojcik/mito_work/dataset_512_protopool/test/0_fl_fl/10kX_914-wt__0055.png \
   --arch resnet18 \
@@ -109,8 +109,9 @@ def build_model_from_checkpoint(
     # (and checkpoint contains 'conv1.weight')
     model.conv1 = nn.Conv2d(3, 64, kernel_size=128, stride=2, padding=3, bias=False)
 
-    # Load weights
-    model.load_state_dict(state, strict=True)
+    missing, unexpected = model.load_state_dict(state, strict=False)
+    print("missing:", missing)
+    print("unexpected:", unexpected)
     model.to(device).eval()
 
     print(f"Rebuilt model from ckpt:")
